@@ -15,23 +15,22 @@ def encode_message(input_image, output_image, message):
         # Add end marker
         data = message_bytes + END_MARKER
 
-        # Convert bytes into binary
-        binary_data = "".join(
-            format(byte, "08b") for byte in data
-        )
+        # Convert every byte into 8-bit binary
+        binary_data = "".join(format(byte, "08b") for byte in data)
 
         # Get image pixels
         pixels = list(image.get_flattened_data())
 
-        # Calculate image capacity
-        capacity = len(pixels) * 3
+        # Calculate maximum message capacity in bytes.
+        # Reserve space for the end marker.
+        capacity_bits = len(pixels) * 3
+        capacity_bytes = capacity_bits // 8
+        max_message_bytes = capacity_bytes - len(END_MARKER)
 
-        if len(binary_data) > capacity:
-            max_bytes = capacity // 8
-
+        if len(message_bytes) > max_message_bytes:
             raise ValueError(
                 f"Message is too large. "
-                f"Maximum capacity is approximately {max_bytes} bytes."
+                f"Maximum message size is {max_message_bytes} bytes."
             )
 
         new_pixels = []
@@ -68,8 +67,10 @@ def encode_message(input_image, output_image, message):
     except OSError as error:
         print(f"Error: Unable to process image: {error}")
 
-    except ValueError as error:
-        print(f"Error: {error}")
+
+    except ValueError:
+
+        raise
 
 
 if __name__ == "__main__":

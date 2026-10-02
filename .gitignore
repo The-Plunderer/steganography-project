@@ -17,3 +17,6 @@ output/
 
 # Generated steganography files
 *.stego.png
+
+# Local test secret
+secret.txt

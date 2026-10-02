@@ -1,5 +1,19 @@
+# Python
 __pycache__/
 *.pyc
+
+# Virtual environment
 .venv/
 venv/
+
+# Environment variables
 .env
+
+# PyCharm
+.idea/
+
+# Generated output
+output/
+
+# Generated steganography files
+*.stego.png

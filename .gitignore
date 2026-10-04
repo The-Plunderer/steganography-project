@@ -20,3 +20,4 @@ output/
 
 # Local test secret
 secret.txt
+tests/test_data/

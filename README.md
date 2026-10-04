@@ -18,7 +18,7 @@ The following implementations are currently working:
 * Secret image extraction
 * Image capacity validation
 * UTF-8 text support
-* Command-line interface for text steganography
+* Unified command-line interface for text and image steganography
 * Automated testing using `pytest`
 
 ---
@@ -78,7 +78,8 @@ steganography-project/
 ├── tests/
 │   ├── test_steganography.py
 │   ├── test_lsb332.py
-│   └── test_spiral332.py
+│   ├── test_spiral332.py
+│   └── test_cli.py
 │
 ├── README.md
 ├── requirements.txt
@@ -92,12 +93,13 @@ steganography-project/
 | ----------------------------- | ---------------------------------------------- |
 | `src/encoder.py`              | Hides a text message inside an image           |
 | `src/decoder.py`              | Extracts a hidden text message                 |
-| `src/steg.py`                 | Command-line interface for text steganography  |
+| `src/steg.py`                 | Unified command-line interface for the project |
 | `src/lsb332.py`               | Image-to-image LSB `(3,3,2)` implementation    |
 | `src/spiral332.py`            | Image-to-image Spiral `(3,3,2)` implementation |
 | `tests/test_steganography.py` | Tests for text steganography                   |
 | `tests/test_lsb332.py`        | Tests for LSB `(3,3,2)`                        |
 | `tests/test_spiral332.py`     | Tests for Spiral `(3,3,2)`                     |
+| `tests/test_cli.py`           | Tests for the unified command-line interface   |
 | `images/`                     | Input images used during development           |
 | `output/`                     | Generated stego and recovered images           |
 | `requirements.txt`            | Python dependencies                            |
@@ -347,63 +349,102 @@ pytest
 
 ---
 
-# 6. Text Steganography Commands
+# 6. Command-Line Interface
 
-### Encode a Message
-
-```bash
-.venv/Scripts/python.exe src/steg.py encode --image images/cover.png --output output/stego.png --message "Hello from my project!"
-```
-
-### Decode a Message
+The project provides a unified command-line interface through:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py decode --image output/stego.png
+.venv/Scripts/python.exe src/steg.py
 ```
 
-### Show CLI Help
+Display the available commands:
 
 ```bash
 .venv/Scripts/python.exe src/steg.py --help
 ```
 
+The current commands are:
+
+```text
+encode
+decode
+capacity
+image-encode
+image-decode
+```
+
 ---
 
-# 7. Image Steganography Commands
+# 7. Text Steganography Commands
+
+## Encode a Message
+
+```bash
+.venv/Scripts/python.exe src/steg.py encode --image images/cover.png --output output/stego.png --message "Hello from my project!"
+```
+
+## Decode a Message
+
+```bash
+.venv/Scripts/python.exe src/steg.py decode --image output/stego.png
+```
+
+## Encode a Message from a Text File
+
+```bash
+.venv/Scripts/python.exe src/steg.py encode --image images/cover.png --output output/stego.png --message-file secret.txt
+```
+
+## Show Text Capacity
+
+```bash
+.venv/Scripts/python.exe src/steg.py capacity --image images/cover.png
+```
+
+---
+
+# 8. Image Steganography Commands
+
+The image-to-image implementations are accessed through the same CLI.
 
 ## LSB `(3,3,2)`
 
 Encode the secret image:
 
 ```bash
-.venv/Scripts/python.exe -c "from src.lsb332 import encode_image; encode_image('images/cover.png','images/secret.png','output/stego_lsb332.png')"
+.venv/Scripts/python.exe src/steg.py image-encode --method lsb332 --cover images/cover.png --secret images/secret.png --output output/stego_lsb332.png
 ```
 
-Decode it:
+Decode the hidden image:
 
 ```bash
-.venv/Scripts/python.exe -c "from src.lsb332 import decode_image; decode_image('output/stego_lsb332.png','output/recovered_lsb332.png')"
+.venv/Scripts/python.exe src/steg.py image-decode --method lsb332 --image output/stego_lsb332.png --output output/recovered_lsb332.png
 ```
-
----
 
 ## Spiral `(3,3,2)`
 
 Encode the secret image:
 
 ```bash
-.venv/Scripts/python.exe -c "from src.spiral332 import encode_image; encode_image('images/cover.png','images/secret.png','output/stego_spiral332.png')"
+.venv/Scripts/python.exe src/steg.py image-encode --method spiral332 --cover images/cover.png --secret images/secret.png --output output/stego_spiral332.png
 ```
 
-Decode it:
+Decode the hidden image:
 
 ```bash
-.venv/Scripts/python.exe -c "from src.spiral332 import decode_image; decode_image('output/stego_spiral332.png','output/recovered_spiral332.png')"
+.venv/Scripts/python.exe src/steg.py image-decode --method spiral332 --image output/stego_spiral332.png --output output/recovered_spiral332.png
+```
+
+The `--method` option currently supports:
+
+```text
+lsb332
+spiral332
 ```
 
 ---
 
-# 8. Capacity
+# 9. Capacity
 
 For the current `(3,3,2)` implementation, one cover pixel is used to store one 8-bit representation of one secret pixel.
 
@@ -437,9 +478,9 @@ Therefore, the test secret image fits comfortably inside the cover image.
 
 ---
 
-# 9. Test Results
+# 10. Test Results
 
-The project has automated tests for the text, LSB image and Spiral image implementations.
+The project has automated tests for the text, LSB image, Spiral image and command-line implementations.
 
 Run all tests with:
 
@@ -450,7 +491,7 @@ Run all tests with:
 Current result:
 
 ```text
-14 passed
+17 passed
 ```
 
 The tests cover:
@@ -472,11 +513,15 @@ Spiral (3,3,2) encoding/decoding
 Spiral image dimensions
 Spiral oversized secret image
 Spiral output generation
+
+CLI help
+CLI LSB (3,3,2) encode/decode
+CLI Spiral (3,3,2) encode/decode
 ```
 
 ---
 
-# 10. Image Quality Results
+# 11. Image Quality Results
 
 A 1200 × 1200 cover image and a 200 × 200 secret image were used for the current test.
 
@@ -502,7 +547,7 @@ This is different from the cover-to-stego measurement. The first measurement tel
 
 ---
 
-# 11. LSB vs Spiral
+# 12. LSB vs Spiral
 
 Both implementations use the same:
 
@@ -528,7 +573,7 @@ Further experiments will be needed to determine whether the different spatial di
 
 ---
 
-# 12. Current Limitations
+# 13. Current Limitations
 
 ### Lossy Secret Image Reconstruction
 
@@ -558,7 +603,7 @@ Visual cryptography is part of the overall project but has not been integrated i
 
 ---
 
-# 13. Development Roadmap
+# 14. Development Roadmap
 
 ### Stage 1 — Basic LSB Steganography
 
@@ -610,7 +655,7 @@ Visual cryptography is part of the overall project but has not been integrated i
 
 **Implementation:** Working
 
-**Automated tests:** 14/14 passing
+**Automated tests:** 17/17 passing
 
 **Next major stage:** Cryptographic protection and visual cryptography
 

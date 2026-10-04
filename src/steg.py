@@ -1,73 +1,63 @@
 import argparse
 
-from PIL import Image
-
 from encoder import encode_message
 from decoder import decode_message
-from lsb332 import encode_image as lsb_encode_image
-from lsb332 import decode_image as lsb_decode_image
-from spiral332 import encode_image as spiral_encode_image
-from spiral332 import decode_image as spiral_decode_image
 
+from lsb332 import (
+    encode_image as lsb_encode_image,
+    decode_image as lsb_decode_image
+)
 
-END_MARKER_SIZE = 13
+from spiral332 import (
+    encode_image as spiral_encode_image,
+    decode_image as spiral_decode_image
+)
 
-
-def show_capacity(image_path):
-    try:
-        image = Image.open(image_path).convert("RGB")
-
-        width, height = image.size
-        channels = 3
-
-        capacity_bits = width * height * channels
-        capacity_bytes = capacity_bits // 8
-        max_message_bytes = capacity_bytes - END_MARKER_SIZE
-
-        print("\nImage Capacity")
-        print("------------------------------")
-        print(f"Image             : {image_path}")
-        print(f"Width             : {width} pixels")
-        print(f"Height            : {height} pixels")
-        print(f"Color channels    : {channels}")
-        print(f"Total capacity    : {capacity_bytes} bytes")
-        print(f"Maximum message   : {max_message_bytes} bytes")
-
-    except FileNotFoundError:
-        print(f"\nError: Image not found: {image_path}")
-
-    except OSError as error:
-        print(f"\nError: Unable to process image: {error}")
+from encrypted_steg import (
+    encrypt_and_embed,
+    extract_and_decrypt
+)
 
 
 def get_image_encoder(method):
+    """
+    Return the image encoder corresponding to the selected method.
+    """
+
     if method == "lsb332":
         return lsb_encode_image
 
     if method == "spiral332":
         return spiral_encode_image
 
-    raise ValueError(f"Unsupported image steganography method: {method}")
+    raise ValueError(
+        f"Unsupported image encoding method: {method}"
+    )
 
 
 def get_image_decoder(method):
+    """
+    Return the image decoder corresponding to the selected method.
+    """
+
     if method == "lsb332":
         return lsb_decode_image
 
     if method == "spiral332":
         return spiral_decode_image
 
-    raise ValueError(f"Unsupported image steganography method: {method}")
+    raise ValueError(
+        f"Unsupported image decoding method: {method}"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Steganography Tool for text and image hiding"
+        description="Steganography CLI"
     )
 
     subparsers = parser.add_subparsers(
-        dest="command",
-        required=True
+        dest="command"
     )
 
     # ---------------------------------------------------------
@@ -75,7 +65,7 @@ def main():
     # ---------------------------------------------------------
     encode_parser = subparsers.add_parser(
         "encode",
-        help="Hide a secret message inside an image"
+        help="Hide a text message inside an image"
     )
 
     encode_parser.add_argument(
@@ -85,23 +75,19 @@ def main():
     )
 
     encode_parser.add_argument(
+        "--message",
+        help="Text message to hide"
+    )
+
+    encode_parser.add_argument(
+        "--message-file",
+        help="Path to a text file containing the message"
+    )
+
+    encode_parser.add_argument(
         "--output",
         required=True,
         help="Path for the generated stego image"
-    )
-
-    message_group = encode_parser.add_mutually_exclusive_group(
-        required=True
-    )
-
-    message_group.add_argument(
-        "--message",
-        help="Secret message to hide"
-    )
-
-    message_group.add_argument(
-        "--message-file",
-        help="Path to a text file containing the secret message"
     )
 
     # ---------------------------------------------------------
@@ -109,7 +95,7 @@ def main():
     # ---------------------------------------------------------
     decode_parser = subparsers.add_parser(
         "decode",
-        help="Extract a hidden message from an image"
+        help="Extract a text message from an image"
     )
 
     decode_parser.add_argument(
@@ -123,7 +109,7 @@ def main():
     # ---------------------------------------------------------
     capacity_parser = subparsers.add_parser(
         "capacity",
-        help="Show the message capacity of an image"
+        help="Show text message capacity of an image"
     )
 
     capacity_parser.add_argument(
@@ -142,9 +128,9 @@ def main():
 
     image_encode_parser.add_argument(
         "--method",
-        required=True,
         choices=["lsb332", "spiral332"],
-        help="Image steganography method"
+        required=True,
+        help="Steganography method"
     )
 
     image_encode_parser.add_argument(
@@ -170,14 +156,14 @@ def main():
     # ---------------------------------------------------------
     image_decode_parser = subparsers.add_parser(
         "image-decode",
-        help="Extract a hidden image from a stego image"
+        help="Recover a hidden image"
     )
 
     image_decode_parser.add_argument(
         "--method",
-        required=True,
         choices=["lsb332", "spiral332"],
-        help="Image steganography method"
+        required=True,
+        help="Steganography method"
     )
 
     image_decode_parser.add_argument(
@@ -187,6 +173,64 @@ def main():
     )
 
     image_decode_parser.add_argument(
+        "--output",
+        required=True,
+        help="Path for the recovered image"
+    )
+
+    # ---------------------------------------------------------
+    # Secure Image Encode
+    # ---------------------------------------------------------
+    secure_encode_parser = subparsers.add_parser(
+        "secure-image-encode",
+        help="Encrypt and hide one image inside another image"
+    )
+
+    secure_encode_parser.add_argument(
+        "--cover",
+        required=True,
+        help="Path to the cover image"
+    )
+
+    secure_encode_parser.add_argument(
+        "--secret",
+        required=True,
+        help="Path to the secret image"
+    )
+
+    secure_encode_parser.add_argument(
+        "--password",
+        required=True,
+        help="Password used for encryption"
+    )
+
+    secure_encode_parser.add_argument(
+        "--output",
+        required=True,
+        help="Path for the generated encrypted stego image"
+    )
+
+    # ---------------------------------------------------------
+    # Secure Image Decode
+    # ---------------------------------------------------------
+    secure_decode_parser = subparsers.add_parser(
+        "secure-image-decode",
+        help="Extract and decrypt a hidden image"
+    )
+
+    secure_decode_parser.add_argument(
+        "--image",
+        required=True,
+        help="Path to the encrypted stego image"
+    )
+
+    secure_decode_parser.add_argument(
+        "--password",
+        required=True,
+        help="Password used for decryption"
+    )
+
+    secure_decode_parser.add_argument(
         "--output",
         required=True,
         help="Path for the recovered secret image"
@@ -199,37 +243,34 @@ def main():
     # ---------------------------------------------------------
     if args.command == "encode":
         try:
+            if args.message is None and args.message_file is None:
+                raise ValueError(
+                    "Provide either --message or --message-file."
+                )
+
+            if args.message is not None and args.message_file is not None:
+                raise ValueError(
+                    "Use either --message or --message-file, not both."
+                )
+
             if args.message_file:
-                try:
-                    with open(
-                        args.message_file,
-                        "r",
-                        encoding="utf-8"
-                    ) as file:
-                        message = file.read()
-
-                except FileNotFoundError:
-                    print(
-                        f"\nError: Message file not found: "
-                        f"{args.message_file}"
-                    )
-                    return
-
-                except OSError as error:
-                    print(
-                        f"\nError: Unable to read message file: "
-                        f"{error}"
-                    )
-                    return
-
+                with open(
+                    args.message_file,
+                    "r",
+                    encoding="utf-8"
+                ) as file:
+                    message = file.read()
             else:
                 message = args.message
 
             encode_message(
                 args.image,
-                args.output,
-                message
+                message,
+                args.output
             )
+
+            print("\nMessage encoded successfully.")
+            print(f"Stego image: {args.output}")
 
         except (ValueError, OSError) as error:
             print(f"\nError: {error}")
@@ -239,9 +280,11 @@ def main():
     # ---------------------------------------------------------
     elif args.command == "decode":
         try:
-            message = decode_message(args.image)
+            message = decode_message(
+                args.image
+            )
 
-            print("\nHidden message:")
+            print("\nDecoded message:")
             print(message)
 
         except (ValueError, OSError) as error:
@@ -251,20 +294,40 @@ def main():
     # Text Capacity
     # ---------------------------------------------------------
     elif args.command == "capacity":
-        show_capacity(args.image)
+        try:
+            from PIL import Image
+
+            image = Image.open(args.image).convert("RGB")
+
+            width, height = image.size
+
+            total_bits = width * height * 3
+            total_bytes = total_bits // 8
+
+            print(f"\nImage size: {width} x {height}")
+            print(f"Approximate capacity: {total_bytes} bytes")
+
+        except (ValueError, OSError) as error:
+            print(f"\nError: {error}")
 
     # ---------------------------------------------------------
     # Image Encode
     # ---------------------------------------------------------
     elif args.command == "image-encode":
         try:
-            encoder = get_image_encoder(args.method)
+            encoder = get_image_encoder(
+                args.method
+            )
 
             encoder(
                 args.cover,
                 args.secret,
                 args.output
             )
+
+            print("\nImage steganography successful.")
+            print(f"Method: {args.method}")
+            print(f"Stego image: {args.output}")
 
         except (ValueError, OSError) as error:
             print(f"\nError: {error}")
@@ -274,12 +337,57 @@ def main():
     # ---------------------------------------------------------
     elif args.command == "image-decode":
         try:
-            decoder = get_image_decoder(args.method)
+            decoder = get_image_decoder(
+                args.method
+            )
 
             decoder(
                 args.image,
                 args.output
             )
+
+            print("\nImage recovery successful.")
+            print(f"Method: {args.method}")
+            print(f"Recovered image: {args.output}")
+
+        except (ValueError, OSError) as error:
+            print(f"\nError: {error}")
+
+    # ---------------------------------------------------------
+    # Secure Image Encode
+    # ---------------------------------------------------------
+    elif args.command == "secure-image-encode":
+        try:
+            encrypt_and_embed(
+                args.cover,
+                args.secret,
+                args.password,
+                args.output
+            )
+
+            print(
+                "\nEncrypted image steganography successful."
+            )
+            print(f"Stego image: {args.output}")
+
+        except (ValueError, OSError) as error:
+            print(f"\nError: {error}")
+
+    # ---------------------------------------------------------
+    # Secure Image Decode
+    # ---------------------------------------------------------
+    elif args.command == "secure-image-decode":
+        try:
+            extract_and_decrypt(
+                args.image,
+                args.password,
+                args.output
+            )
+
+            print(
+                "\nEncrypted image recovery successful."
+            )
+            print(f"Recovered image: {args.output}")
 
         except (ValueError, OSError) as error:
             print(f"\nError: {error}")

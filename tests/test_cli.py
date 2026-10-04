@@ -99,3 +99,108 @@ def test_cli_spiral332_encode_decode(tmp_path):
 
     recovered = Image.open(recovered_path)
     assert recovered.size == (5, 5)
+
+def test_cli_secure_image_encode_decode(tmp_path):
+    cover_path = tmp_path / "cover.png"
+    secret_path = tmp_path / "secret.png"
+    stego_path = tmp_path / "stego.png"
+    recovered_path = tmp_path / "recovered.png"
+
+    Image.new("RGB", (50, 50), "blue").save(cover_path)
+    Image.new("RGB", (20, 20), "red").save(secret_path)
+
+    encode_result = subprocess.run(
+        [
+            PYTHON,
+            "src/steg.py",
+            "secure-image-encode",
+            "--cover",
+            str(cover_path),
+            "--secret",
+            str(secret_path),
+            "--password",
+            "ProjectPassword123",
+            "--output",
+            str(stego_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert encode_result.returncode == 0
+    assert stego_path.exists()
+
+    decode_result = subprocess.run(
+        [
+            PYTHON,
+            "src/steg.py",
+            "secure-image-decode",
+            "--image",
+            str(stego_path),
+            "--password",
+            "ProjectPassword123",
+            "--output",
+            str(recovered_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert decode_result.returncode == 0
+    assert recovered_path.exists()
+
+    original = Image.open(secret_path).convert("RGB")
+    recovered = Image.open(recovered_path).convert("RGB")
+
+    assert recovered.size == original.size
+    assert recovered.tobytes() == original.tobytes()
+
+
+def test_cli_secure_image_wrong_password(tmp_path):
+    cover_path = tmp_path / "cover.png"
+    secret_path = tmp_path / "secret.png"
+    stego_path = tmp_path / "stego.png"
+    recovered_path = tmp_path / "recovered.png"
+
+    Image.new("RGB", (50, 50), "blue").save(cover_path)
+    Image.new("RGB", (20, 20), "red").save(secret_path)
+
+    encode_result = subprocess.run(
+        [
+            PYTHON,
+            "src/steg.py",
+            "secure-image-encode",
+            "--cover",
+            str(cover_path),
+            "--secret",
+            str(secret_path),
+            "--password",
+            "ProjectPassword123",
+            "--output",
+            str(stego_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert encode_result.returncode == 0
+
+    decode_result = subprocess.run(
+        [
+            PYTHON,
+            "src/steg.py",
+            "secure-image-decode",
+            "--image",
+            str(stego_path),
+            "--password",
+            "WrongPassword123",
+            "--output",
+            str(recovered_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert decode_result.returncode == 0
+    assert "Decryption failed" in decode_result.stdout
+    assert not recovered_path.exists()

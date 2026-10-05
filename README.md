@@ -1,66 +1,107 @@
 # Steganography and Visual Cryptography
 
-A final-year project for studying and implementing techniques used to hide and protect information inside digital images.
+A final-year B.Tech Computer Science and Engineering project focused on studying and implementing **Steganography, Cryptography, Adaptive Image Steganography, and Visual Cryptography**.
 
-The current implementation covers:
+The project explores multiple techniques for hiding information inside digital images, protecting hidden information using authenticated encryption, and eventually reconstructing secret information through Visual Cryptography.
 
-* Basic text steganography using LSB substitution
+---
+
+# 1. Project Overview
+
+The project currently implements three major layers:
+
+```text
+                    INFORMATION SECURITY
+                            |
+             +--------------+--------------+
+             |                             |
+             v                             v
+       STEGANOGRAPHY                  CRYPTOGRAPHY
+             |                             |
+             |                       AES-256-GCM
+             |                       PBKDF2-SHA256
+             |                             |
+             +--------------+--------------+
+                            |
+                            v
+                 SECURE STEGANOGRAPHY
+                            |
+                            v
+                  VISUAL CRYPTOGRAPHY
+                     (Next Stage)
+```
+
+The current implementation includes:
+
+* Basic text steganography
 * UTF-8 text hiding and extraction
-* Image-to-image steganography using LSB `(3,3,2)`
-* Image-to-image steganography using Spiral `(3,3,2)`
+* Image-to-image steganography
+* LSB `(3,3,2)` image steganography
+* Spiral `(3,3,2)` image steganography
+* Adaptive `(1 + 4 + 3)` image steganography
+* Adaptive Green/Blue channel selection
+* Red-channel 2-bit channel indicator
 * Image capacity validation
-* A unified command-line interface
+* Unified command-line interface
 * Password-protected encrypted image steganography
 * AES-256-GCM encryption
-* PBKDF2-HMAC-SHA256 password-based key derivation
+* PBKDF2-HMAC-SHA256 key derivation
 * Random salt and nonce generation
 * Authentication and integrity verification
 * Wrong-password detection
 * Corrupted encrypted-data detection
 * Pixel-perfect recovery of encrypted secret images
-* Automated testing with `pytest`
+* Automated testing using `pytest`
+* Git/GitHub-based version control
 
-Visual Cryptography is planned as the next major stage of the project.
+**Visual Cryptography is the next major implementation stage.**
 
 ---
 
-# 1. Project Objectives
+# 2. Project Objectives
 
 The main objectives of this project are to:
 
-* Understand how information can be hidden inside digital images.
+* Understand information hiding in digital images.
 * Implement basic LSB text steganography.
 * Hide and recover text messages.
+* Support UTF-8 text messages.
 * Hide one image inside another image.
-* Implement multiple pixel traversal methods.
-* Compare normal LSB traversal with Spiral traversal.
-* Check image capacity before embedding data.
-* Study the limitations of basic image steganography.
-* Understand password-based cryptographic protection.
-* Encrypt secret image data before embedding it.
+* Implement multiple image traversal techniques.
+* Compare sequential and spiral traversal.
+* Implement adaptive image steganography.
+* Dynamically select between Green and Blue channels.
+* Store a channel-selection indicator inside the Red channel.
+* Validate image capacity before embedding.
+* Study the limitations of reduced-bit image representations.
+* Encrypt secret image data before embedding.
 * Protect encrypted data against unauthorized modification.
-* Detect incorrect passwords and corrupted encrypted data.
-* Combine cryptography and steganography into a single pipeline.
-* Implement Visual Cryptography in a later stage.
-* Evaluate the security, quality, and limitations of the complete system.
+* Detect incorrect passwords.
+* Detect corrupted encrypted payloads.
+* Combine cryptography and steganography.
+* Implement Visual Cryptography.
+* Investigate colour Visual Cryptography.
+* Evaluate image quality using metrics such as PSNR.
+* Study pixel expansion and reconstruction quality.
+* Compare security, capacity, visual quality, and computational complexity.
 
 ---
 
-# 2. Technology Stack
+# 3. Technology Stack
 
-| Technology   | Purpose                               |
-| ------------ | ------------------------------------- |
-| Python 3     | Main programming language             |
-| Pillow       | Image loading, processing, and saving |
-| NumPy        | Image-array and pixel manipulation    |
-| cryptography | AES-GCM and PBKDF2 implementation     |
-| pytest       | Automated testing                     |
-| Git          | Version control                       |
-| GitHub       | Repository hosting                    |
-| Git Bash     | Command-line environment              |
-| PyCharm      | Development environment               |
+| Technology        | Purpose                               |
+| ----------------- | ------------------------------------- |
+| Python 3          | Main programming language             |
+| Pillow            | Image loading, processing, and saving |
+| NumPy             | Pixel and image-array manipulation    |
+| cryptography      | AES-GCM and PBKDF2 implementation     |
+| pytest            | Automated testing                     |
+| Git               | Version control                       |
+| GitHub            | Repository hosting                    |
+| Git Bash / UCRT64 | Command-line environment              |
+| PyCharm           | Development environment               |
 
-The Python dependencies are defined in:
+The project dependencies are defined in:
 
 ```text
 requirements.txt
@@ -77,7 +118,7 @@ cryptography
 
 ---
 
-# 3. Current Repository Structure
+# 4. Repository Structure
 
 The current repository structure is:
 
@@ -89,6 +130,7 @@ steganography-project/
 │   └── secret.png
 │
 ├── src/
+│   ├── adaptive332.py
 │   ├── crypto_utils.py
 │   ├── decoder.py
 │   ├── encoder.py
@@ -98,6 +140,7 @@ steganography-project/
 │   └── steg.py
 │
 ├── tests/
+│   ├── test_adaptive332.py
 │   ├── test_cli.py
 │   ├── test_crypto_utils.py
 │   ├── test_encrypted_steg.py
@@ -110,59 +153,71 @@ steganography-project/
 └── requirements.txt
 ```
 
-Generated output images are used during testing and command execution but are **not currently stored in a committed `output/` directory**.
+Generated output images are used during testing and command execution but are not required to be stored in the repository.
 
 ---
 
-# 4. Source Files
+# 5. Source Files
 
 | File                    | Purpose                                                            |
 | ----------------------- | ------------------------------------------------------------------ |
 | `src/encoder.py`        | Encodes text messages into images                                  |
 | `src/decoder.py`        | Decodes hidden text messages                                       |
 | `src/steg.py`           | Unified command-line interface                                     |
-| `src/lsb332.py`         | Image-to-image LSB `(3,3,2)` implementation                        |
-| `src/spiral332.py`      | Image-to-image Spiral `(3,3,2)` implementation                     |
+| `src/lsb332.py`         | Sequential LSB `(3,3,2)` image steganography                       |
+| `src/spiral332.py`      | Spiral `(3,3,2)` image steganography                               |
+| `src/adaptive332.py`    | Adaptive Green/Blue image steganography                            |
 | `src/crypto_utils.py`   | PBKDF2 key derivation and AES-GCM encryption/decryption            |
 | `src/encrypted_steg.py` | Serializes, encrypts, embeds, extracts, and decrypts secret images |
 
 ---
 
-# 5. Test Files
+# 6. Test Files
 
-| File                           | Purpose                                    |
-| ------------------------------ | ------------------------------------------ |
-| `tests/test_steganography.py`  | Tests basic text steganography             |
-| `tests/test_lsb332.py`         | Tests LSB `(3,3,2)` image steganography    |
-| `tests/test_spiral332.py`      | Tests Spiral `(3,3,2)` image steganography |
-| `tests/test_cli.py`            | Tests the unified command-line interface   |
-| `tests/test_crypto_utils.py`   | Tests cryptographic utilities              |
-| `tests/test_encrypted_steg.py` | Tests encrypted image steganography        |
+| File                           | Purpose                                     |
+| ------------------------------ | ------------------------------------------- |
+| `tests/test_steganography.py`  | Basic text steganography                    |
+| `tests/test_lsb332.py`         | LSB `(3,3,2)` image steganography           |
+| `tests/test_spiral332.py`      | Spiral `(3,3,2)` image steganography        |
+| `tests/test_adaptive332.py`    | Adaptive332 channel selection and embedding |
+| `tests/test_cli.py`            | Unified CLI behaviour                       |
+| `tests/test_crypto_utils.py`   | Cryptographic utilities                     |
+| `tests/test_encrypted_steg.py` | Encrypted image steganography               |
 
 ---
 
-# 6. Input Images
+# 7. Input Images
 
-The repository currently contains two input images:
+The project currently uses:
 
 ```text
 images/cover.png
 images/secret.png
 ```
 
-### `cover.png`
+### Cover Image
 
-The cover image is the image into which data is embedded.
+The cover image is the image into which the secret information is embedded.
 
-### `secret.png`
+```text
+Cover Image
+    |
+    v
+Embedding Process
+    |
+    v
+Stego Image
+```
 
-The secret image is the image or information being hidden.
+### Secret Image
+
+The secret image contains the information that is intended to be hidden.
 
 ---
 
-# 7. Basic Text Steganography
+# 8. Basic Text Steganography
 
-The first implementation hides a text message inside an RGB image.
+The first implementation hides text messages inside RGB images using Least Significant Bit substitution.
 
 An RGB pixel contains:
 
@@ -175,9 +230,7 @@ Pixel
 
 Each channel contains 8 bits.
 
-The basic text steganography implementation modifies the least significant bits of the image channels to store the message.
-
-Conceptually:
+For example:
 
 ```text
 Original Pixel
@@ -185,26 +238,111 @@ Original Pixel
 Red   = 10110100
 Green = 01101011
 Blue  = 11001010
+```
 
+After embedding a small amount of information:
 
-After embedding
+```text
+Modified Pixel
 
 Red   = 10110101
 Green = 01101010
 Blue  = 11001010
 ```
 
-Only the least significant bits are modified, so the visual difference is generally very small.
+Only low-order bits are changed.
 
-The decoder extracts the stored bits and reconstructs the original message.
+The decoder extracts the embedded bits and reconstructs the original text.
 
-The implementation also supports UTF-8 text.
+The implementation also supports UTF-8 messages.
 
 ---
 
-# 8. Image-to-Image Steganography
+# 9. Text Encoding Workflow
 
-The project also supports hiding one image inside another.
+The basic text-steganography pipeline is:
+
+```text
+Text Message
+     |
+     v
+UTF-8 Encoding
+     |
+     v
+Binary Data
+     |
+     v
+LSB Embedding
+     |
+     v
+Stego Image
+```
+
+The reverse process is:
+
+```text
+Stego Image
+     |
+     v
+LSB Extraction
+     |
+     v
+Binary Data
+     |
+     v
+UTF-8 Decoding
+     |
+     v
+Original Message
+```
+
+---
+
+# 10. Text Encode
+
+The `encode` command hides a text message inside an image.
+
+Example:
+
+```bash
+py src/steg.py encode --image images/cover.png --message "Hello from my project!" --output stego.png
+```
+
+A message can also be loaded from a file:
+
+```bash
+py src/steg.py encode --image images/cover.png --message-file secret.txt --output stego.png
+```
+
+The CLI accepts either:
+
+```text
+--message
+```
+
+or:
+
+```text
+--message-file
+```
+
+---
+
+# 11. Text Decode
+
+To extract a hidden text message:
+
+```bash
+py src/steg.py decode --image stego.png
+```
+
+The decoder reconstructs and prints the hidden message.
+
+---
+
+# 12. Image-to-Image Steganography
+
+The project supports hiding one image inside another.
 
 The general workflow is:
 
@@ -226,25 +364,26 @@ Steganographic Decoding
 Recovered Image
 ```
 
-Two image-embedding methods are currently implemented:
+Three image-steganography methods are currently implemented:
 
 ```text
-1. LSB (3,3,2)
-2. Spiral (3,3,2)
+1. LSB332
+2. Spiral332
+3. Adaptive332
 ```
 
 ---
 
-# 9. LSB `(3,3,2)`
+# 13. LSB `(3,3,2)` Image Steganography
 
-The `(3,3,2)` scheme allocates the least significant bits of each RGB channel as follows:
+The LSB332 method allocates the available low-order bits as:
 
 ```text
 Red   → 3 bits
 Green → 3 bits
 Blue  → 2 bits
 
-Total → 8 bits per cover pixel
+Total → 8 payload bits per cover pixel
 ```
 
 Conceptually:
@@ -256,7 +395,8 @@ Red   : XXXXXXXX
 Green : XXXXXXXX
 Blue  : XXXXXXXX
 
-             ↓
+             |
+             v
 
 Embedded Pixel
 
@@ -265,55 +405,98 @@ Green : XXXXXGGG
 Blue  : XXXXXXBB
 ```
 
-where:
+Therefore:
 
 ```text
-R = secret-image information
-G = secret-image information
-B = secret-image information
+3 + 3 + 2 = 8 bits
 ```
 
-The current implementation uses this 3-3-2 allocation for image-to-image embedding.
+The method processes cover-image pixels sequentially.
 
 ---
 
-# 10. LSB Traversal
+# 14. LSB Traversal
 
-The LSB implementation processes pixels in normal row-by-row order.
+The LSB332 implementation processes pixels row by row:
+
+```text
+(0,0) → (0,1) → (0,2) → (0,3) → ...
+   ↓
+next row
+   ↓
+next row
+```
+
+This provides a simple and predictable embedding sequence.
+
+The method is useful as the baseline against which the Spiral332 and Adaptive332 techniques can be compared.
+
+---
+
+# 15. LSB Image Encoding
+
+Example:
+
+```bash
+py src/steg.py image-encode --method lsb332 --cover images/cover.png --secret images/secret.png --output output/stego_lsb332.png
+```
+
+---
+
+# 16. LSB Image Decoding
+
+Example:
+
+```bash
+py src/steg.py image-decode --method lsb332 --image output/stego_lsb332.png --output output/recovered_lsb332.png
+```
+
+Because only 8 bits are used to represent a 24-bit RGB secret pixel, the ordinary LSB332 representation is not pixel-perfect.
 
 Conceptually:
 
 ```text
-(0,0) → (0,1) → (0,2) → ...
-   ↓
-next row
-   ↓
-next row
+Original Secret Pixel
+        |
+        v
+24-bit RGB information
+        |
+        v
+8-bit embedded representation
+        |
+        v
+Recovered Pixel
 ```
-
-The secret image's dimensions and pixel information are encoded according to the implementation in `src/lsb332.py`.
-
-During decoding, the stored information is used to reconstruct the secret image.
-
-Because the `(3,3,2)` representation stores only 8 bits per secret pixel instead of the original 24-bit RGB representation, ordinary image recovery is not pixel-perfect.
 
 Therefore:
 
 ```text
 Original Secret Image
         ≠
-Recovered LSB Image
+Recovered LSB332 Image
 ```
 
-at the exact RGB-pixel level.
+at exact RGB-pixel level.
+
+This is expected behaviour for the reduced-bit representation.
 
 ---
 
-# 11. Spiral `(3,3,2)`
+# 17. Spiral `(3,3,2)` Image Steganography
 
-The Spiral implementation uses the same 3-3-2 bit allocation but changes the order in which cover-image pixels are processed.
+Spiral332 uses the same bit allocation as LSB332:
 
-For example, a small image can be traversed conceptually as:
+```text
+Red   → 3 bits
+Green → 3 bits
+Blue  → 2 bits
+```
+
+However, the major difference is the **pixel traversal order**.
+
+Instead of processing the image sequentially, pixels are traversed in a spiral pattern.
+
+Conceptually:
 
 ```text
 (0,0) → (0,1) → (0,2)
@@ -323,153 +506,635 @@ For example, a small image can be traversed conceptually as:
 (2,0) → (2,1) → (2,2)
 ```
 
-The exact traversal is implemented in:
+Therefore:
+
+```text
+LSB332
+    |
+    +--> Sequential traversal
+    |
+    +--> 3-3-2 allocation
+
+
+Spiral332
+    |
+    +--> Spiral traversal
+    |
+    +--> 3-3-2 allocation
+```
+
+The implementation is contained in:
 
 ```text
 src/spiral332.py
 ```
 
-The important difference is:
+---
 
-```text
-LSB332
-→ sequential pixel traversal
+# 18. Spiral Image Encoding
 
-Spiral332
-→ spiral pixel traversal
-```
+Example:
 
-The bit allocation remains:
-
-```text
-Red   → 3 bits
-Green → 3 bits
-Blue  → 2 bits
+```bash
+py src/steg.py image-encode --method spiral332 --cover images/cover.png --secret images/secret.png --output output/stego_spiral332.png
 ```
 
 ---
 
-# 12. Unified CLI
+# 19. Spiral Image Decoding
 
-All major functionality is exposed through:
-
-```text
-src/steg.py
-```
-
-The CLI currently provides these commands:
-
-```text
-encode
-decode
-capacity
-image-encode
-image-decode
-secure-image-encode
-secure-image-decode
-```
-
-To display the available commands:
+Example:
 
 ```bash
-python src/steg.py --help
-```
-
-If using the project's virtual environment:
-
-```bash
-.venv/Scripts/python.exe src/steg.py --help
+py src/steg.py image-decode --method spiral332 --image output/stego_spiral332.png --output output/recovered_spiral332.png
 ```
 
 ---
 
-# 13. Text Encode
+# 20. Adaptive332 Image Steganography
 
-The `encode` command hides a text message inside an image.
+Adaptive332 is the latest image-steganography method implemented in the project.
 
-### Using a direct message
+Unlike LSB332 and Spiral332, which always use a fixed `3-3-2` allocation, Adaptive332 dynamically determines whether **Green or Blue** should receive the additional payload bit.
 
-```bash
-.venv/Scripts/python.exe src/steg.py encode --image images/cover.png --message "Hello from my project!" --output stego.png
-```
-
-The arguments are:
+The method is designed around the following principle:
 
 ```text
---image
-    Path to the cover image
+Select the lower-intensity channel
+between Green and Blue.
 
---message
-    Text message to hide
+        |
+        v
 
---output
-    Path for the generated stego image
+Give that channel
+the additional payload bit.
 ```
 
-The command prints:
+The method still stores exactly:
 
 ```text
-Message encoded successfully.
-Stego image: stego.png
+8 payload bits per cover pixel
 ```
 
 ---
 
-# 14. Text Encode Using a File
+# 21. Adaptive332 Bit Allocation
 
-A message can also be read from a text file.
-
-```bash
-.venv/Scripts/python.exe src/steg.py encode --image images/cover.png --message-file secret.txt --output stego.png
-```
-
-The CLI requires either:
+Each cover pixel contains:
 
 ```text
---message
+Red
+Green
+Blue
+```
+
+Adaptive332 allocates the payload as follows.
+
+### Red Channel
+
+Red stores:
+
+```text
+1 payload bit
++
+2-bit channel indicator
+```
+
+Therefore:
+
+```text
+Red = 1 payload bit + 2 indicator bits
+```
+
+### Green and Blue Channels
+
+One of the two channels receives 4 payload bits.
+
+The other receives 3 payload bits.
+
+Therefore:
+
+```text
+Case 1:
+
+Red   → 1 payload bit
+Green → 4 payload bits
+Blue  → 3 payload bits
+
+Total = 1 + 4 + 3
+      = 8 payload bits
 ```
 
 or:
 
 ```text
---message-file
+Case 2:
+
+Red   → 1 payload bit
+Green → 3 payload bits
+Blue  → 4 payload bits
+
+Total = 1 + 3 + 4
+      = 8 payload bits
 ```
 
-but not both.
+The allocation is therefore:
+
+```text
+                Adaptive332
+                     |
+          +----------+----------+
+          |                     |
+          v                     v
+      Green selected        Blue selected
+          |                     |
+     R = 1 + indicator     R = 1 + indicator
+     G = 4 payload bits    G = 3 payload bits
+     B = 3 payload bits    B = 4 payload bits
+          |                     |
+          +----------+----------+
+                     |
+                     v
+              8 payload bits
+```
 
 ---
 
-# 15. Text Decode
+# 22. Adaptive Channel Selection
 
-The `decode` command extracts a hidden text message.
+The Green and Blue channel intensities of the cover pixel are compared.
 
-```bash
-.venv/Scripts/python.exe src/steg.py decode --image stego.png
-```
-
-The CLI prints:
+The implementation uses:
 
 ```text
-Decoded message:
-<hidden message>
+if Green <= Blue:
+    select Green
+else:
+    select Blue
+```
+
+Therefore:
+
+```text
+Green <= Blue
+       |
+       v
+Green receives 4 bits
+Blue receives 3 bits
+```
+
+while:
+
+```text
+Blue < Green
+       |
+       v
+Blue receives 4 bits
+Green receives 3 bits
+```
+
+This selection is performed by:
+
+```text
+choose_embedding_channel()
+```
+
+in:
+
+```text
+src/adaptive332.py
 ```
 
 ---
 
-# 16. Image Capacity
+# 23. Red-Channel Indicator
 
-The `capacity` command reports the approximate text capacity of an image.
+The decoder must know which channel received the additional payload bit.
 
-```bash
-.venv/Scripts/python.exe src/steg.py capacity --image images/cover.png
-```
+Adaptive332 therefore stores a 2-bit indicator in the least significant bits of Red.
 
-The command reports:
+The indicator values currently defined are:
 
 ```text
-Image size: <width> x <height>
-Approximate capacity: <bytes> bytes
+00 → Green
+01 → Blue
 ```
+
+The remaining values are reserved:
+
+```text
+10 → Reserved
+11 → Reserved
+```
+
+The implementation currently treats reserved values as Green during decoding.
+
+The indicator therefore acts as a small control field:
+
+```text
+Red Channel
+
+Bit 7  Bit 6  Bit 5  Bit 4  Bit 3  Bit 2  Bit 1  Bit 0
+  |      |      |      |      |      |      |      |
+  +------+------+------+------+      +------+------+ 
+       Cover information              Indicator
+
+                              +----+
+                              |    |
+                              v    v
+                             00 / 01
+                             
+                              0 = Green
+                              1 = Blue
+```
+
+The actual payload bit is stored separately from the indicator.
+
+---
+
+# 24. Adaptive332 Pixel Embedding
+
+For every secret RGB pixel:
+
+```text
+Secret Pixel
+     |
+     +---- Red
+     |
+     +---- Green
+     |
+     +---- Blue
+```
+
+The Red component contributes its highest-order payload bit:
+
+```text
+Secret Red
+    |
+    v
+1 payload bit
+```
+
+The Green and Blue components are distributed according to the selected channel.
+
+### Green Selected
+
+```text
+Secret Red   → 1 bit
+Secret Green → 4 bits
+Secret Blue  → 3 bits
+
+Total = 8 bits
+```
+
+### Blue Selected
+
+```text
+Secret Red   → 1 bit
+Secret Green → 3 bits
+Secret Blue  → 4 bits
+
+Total = 8 bits
+```
+
+---
+
+# 25. Adaptive332 Encoding Logic
+
+The complete pixel-level process is:
+
+```text
+                 Cover Pixel
+                     |
+              +------+------+
+              |             |
+            Green          Blue
+              |             |
+              +------+------+
+                     |
+                     v
+             Compare intensity
+                     |
+          +----------+----------+
+          |                     |
+       Green <= Blue          Blue < Green
+          |                     |
+          v                     v
+      Select Green          Select Blue
+          |                     |
+          v                     v
+     G = 4 bits             B = 4 bits
+     B = 3 bits             G = 3 bits
+          |                     |
+          +----------+----------+
+                     |
+                     v
+             Store indicator
+               inside Red
+                     |
+                     v
+              Adaptive Stego
+                  Pixel
+```
+
+---
+
+# 26. Adaptive332 Decoding
+
+During decoding, the Red channel is examined first.
+
+```text
+Stego Pixel
+     |
+     v
+Read Red indicator
+     |
+     +----------+----------+
+     |                     |
+    00                    01
+     |                     |
+     v                     v
+  Green                  Blue
+ selected               selected
+     |                     |
+     v                     v
+G = 4, B = 3          G = 3, B = 4
+     |                     |
+     +----------+----------+
+                |
+                v
+         Recover RGB pixel
+```
+
+The decoder uses the indicator to determine how many payload bits must be extracted from Green and Blue.
+
+---
+
+# 27. Adaptive332 Example
+
+Suppose the cover pixel is:
+
+```text
+R = 100
+G = 50
+B = 100
+```
+
+Because:
+
+```text
+G <= B
+50 <= 100
+```
+
+Green is selected.
+
+Therefore:
+
+```text
+Red   → 1 payload bit + indicator
+Green → 4 payload bits
+Blue  → 3 payload bits
+```
+
+For another cover pixel:
+
+```text
+R = 100
+G = 150
+B = 80
+```
+
+Because:
+
+```text
+B < G
+80 < 150
+```
+
+Blue is selected.
+
+Therefore:
+
+```text
+Red   → 1 payload bit + indicator
+Green → 3 payload bits
+Blue  → 4 payload bits
+```
+
+This demonstrates the adaptive nature of the algorithm.
+
+---
+
+# 28. Adaptive332 CLI Integration
+
+Adaptive332 is integrated into the unified CLI.
+
+The available image methods are:
+
+```text
+lsb332
+spiral332
+adaptive332
+```
+
+The CLI therefore provides:
+
+```bash
+py src/steg.py image-encode --method adaptive332 --cover images/cover.png --secret images/secret.png --output output/stego_adaptive332.png
+```
+
+Expected output:
+
+```text
+Adaptive steganography encoding successful.
+Cover image: <width> x <height>
+Secret image: <width> x <height>
+Output: output/stego_adaptive332.png
+
+Image steganography successful.
+Method: adaptive332
+Stego image: output/stego_adaptive332.png
+```
+
+---
+
+# 29. Adaptive332 Image Decoding
+
+The corresponding decoding command is:
+
+```bash
+py src/steg.py image-decode --method adaptive332 --image output/stego_adaptive332.png --output output/recovered_adaptive332.png
+```
+
+Expected output:
+
+```text
+Adaptive steganography decoding successful.
+Recovered secret image: <width> x <height>
+Output: output/recovered_adaptive332.png
+
+Image recovery successful.
+Method: adaptive332
+Recovered image: output/recovered_adaptive332.png
+```
+
+---
+
+# 30. Adaptive332 Capacity
+
+Adaptive332 stores:
+
+```text
+8 payload bits
+```
+
+per cover pixel used for secret image data.
+
+Therefore:
+
+```text
+1 cover pixel
+       |
+       v
+8 payload bits
+       |
+       v
+1 byte of secret-image information
+```
+
+The first four pixels are reserved for metadata.
+
+Therefore:
+
+```text
+Available secret-image pixels
+=
+Total cover pixels - 4
+```
+
+The implementation checks:
+
+```text
+Secret pixels <= Cover pixels - 4
+```
+
+before encoding.
+
+If the secret image is too large, the encoder raises a capacity error.
+
+---
+
+# 31. Image Metadata
+
+The image-based methods store secret-image dimensions in the first four pixels.
+
+The metadata stores:
+
+```text
+Secret Width
+Secret Height
+```
+
+using the standard `(3,3,2)` representation.
+
+The structure is:
+
+```text
+Pixel 0 → Width high byte
+Pixel 1 → Width low byte
+Pixel 2 → Height high byte
+Pixel 3 → Height low byte
+```
+
+The remaining pixels contain the secret image payload.
+
+---
+
+# 32. Comparison of Image Steganography Methods
+
+| Feature            | LSB332               | Spiral332           | Adaptive332                |
+| ------------------ | -------------------- | ------------------- | -------------------------- |
+| Pixel traversal    | Sequential           | Spiral              | Sequential                 |
+| Red payload        | 3 bits               | 3 bits              | 1 bit                      |
+| Green payload      | 3 bits               | 3 bits              | 3 or 4 bits                |
+| Blue payload       | 2 bits               | 2 bits              | 3 or 4 bits                |
+| Channel selection  | Fixed                | Fixed               | Adaptive                   |
+| Red indicator      | No                   | No                  | Yes                        |
+| Payload / pixel    | 8 bits               | 8 bits              | 8 bits                     |
+| Metadata           | Yes                  | Yes                 | Yes                        |
+| Exact RGB recovery | No                   | No                  | No                         |
+| Main idea          | Fixed LSB allocation | Alternate traversal | Dynamic channel allocation |
+
+The three approaches therefore provide different research directions:
+
+```text
+LSB332
+  |
+  +--> Baseline method
+
+
+Spiral332
+  |
+  +--> Traversal variation
+
+
+Adaptive332
+  |
+  +--> Channel-selection variation
+```
+
+---
+
+# 33. Important Note About Normal Image Recovery
+
+The normal image-steganography methods use a reduced representation of each secret RGB pixel.
+
+An original RGB pixel contains:
+
+```text
+8 bits Red
+8 bits Green
+8 bits Blue
+
+Total = 24 bits
+```
+
+The current normal image methods embed:
+
+```text
+8 payload bits
+```
+
+per cover pixel.
+
+Therefore:
+
+```text
+24-bit RGB secret pixel
+          |
+          v
+     8-bit payload
+          |
+          v
+   Reduced recovery
+```
+
+The recovered image is therefore **not expected to be pixel-perfect**.
+
+This is an intentional property of the current educational implementation and is consistent with the existing LSB332/Spiral332 design.
+
+---
+
+# 34. Image Capacity Command
+
+The CLI also provides an image capacity command:
+
+```bash
+py src/steg.py capacity --image images/cover.png
+```
+
+The command reports the approximate text capacity of the image.
 
 The current calculation is based on:
 
@@ -481,95 +1146,53 @@ followed by conversion from bits to bytes.
 
 ---
 
-# 17. Image Encode
+# 35. Unified CLI
 
-The `image-encode` command hides one image inside another.
-
-It requires:
+All major functionality is exposed through:
 
 ```text
---method
---cover
---secret
---output
+src/steg.py
 ```
 
-The available methods are:
+The current command structure includes:
 
 ```text
-lsb332
-spiral332
+encode
+decode
+capacity
+image-encode
+image-decode
+secure-image-encode
+secure-image-decode
 ```
 
----
-
-## 17.1 LSB Image Encoding
+To view the available commands:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py image-encode --method lsb332 --cover images/cover.png --secret images/secret.png --output stego_lsb332.png
+py src/steg.py --help
 ```
 
-Expected output:
-
-```text
-Image steganography successful.
-Method: lsb332
-Stego image: stego_lsb332.png
-```
-
----
-
-## 17.2 Spiral Image Encoding
+For image encoding:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py image-encode --method spiral332 --cover images/cover.png --secret images/secret.png --output stego_spiral332.png
+py src/steg.py image-encode --help
 ```
 
-Expected output:
-
-```text
-Image steganography successful.
-Method: spiral332
-Stego image: stego_spiral332.png
-```
-
----
-
-# 18. Image Decode
-
-The `image-decode` command recovers an image hidden using one of the image-steganography methods.
-
-It requires:
-
-```text
---method
---image
---output
-```
-
----
-
-## 18.1 LSB Image Decoding
+For image decoding:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py image-decode --method lsb332 --image stego_lsb332.png --output recovered_lsb332.png
+py src/steg.py image-decode --help
 ```
 
 ---
 
-## 18.2 Spiral Image Decoding
+# 36. Secure Image Steganography
 
-```bash
-.venv/Scripts/python.exe src/steg.py image-decode --method spiral332 --image stego_spiral332.png --output recovered_spiral332.png
-```
+The project also includes an encrypted image-steganography pipeline.
 
----
+Unlike normal image steganography, the secret image is encrypted before being embedded.
 
-# 19. Secure Image Steganography
-
-The project now includes a separate encrypted image-steganography pipeline.
-
-The secure workflow is:
+The workflow is:
 
 ```text
 Secret Image
@@ -599,11 +1222,17 @@ Encrypted Payload
 Encrypted Stego Image
 ```
 
-This differs from normal image steganography because the secret image is encrypted **before** it is embedded.
+This provides two security layers:
+
+```text
+Cryptography
+     +
+Steganography
+```
 
 ---
 
-# 20. Cryptographic Configuration
+# 37. Cryptographic Configuration
 
 The cryptographic implementation is contained in:
 
@@ -611,31 +1240,22 @@ The cryptographic implementation is contained in:
 src/crypto_utils.py
 ```
 
-The current constants are:
+Current configuration:
 
-```text
-SALT_SIZE = 16
-NONCE_SIZE = 12
-KEY_SIZE = 32
-PBKDF2_ITERATIONS = 600_000
-```
-
-Therefore:
-
-| Parameter         |       Current value |
+| Parameter         |               Value |
 | ----------------- | ------------------: |
-| AES key           | 256 bits / 32 bytes |
-| Salt              |            16 bytes |
-| Nonce             |            12 bytes |
+| AES key size      | 256 bits / 32 bytes |
+| Salt size         |            16 bytes |
+| Nonce size        |            12 bytes |
 | PBKDF2 iterations |             600,000 |
-| KDF hash          |             SHA-256 |
+| KDF               |  PBKDF2-HMAC-SHA256 |
 | Encryption        |             AES-GCM |
 
 ---
 
-# 21. PBKDF2-HMAC-SHA256
+# 38. PBKDF2-HMAC-SHA256
 
-The password supplied by the user is not directly used as an AES key.
+The user password is not directly used as an AES key.
 
 Instead:
 
@@ -648,12 +1268,12 @@ Random Salt
 PBKDF2-HMAC-SHA256
     |
     v
-32-byte AES key
+32-byte AES Key
 ```
 
-A new random 16-byte salt is generated for every encryption operation.
+A random 16-byte salt is generated for every encryption operation.
 
-The implementation uses:
+The current configuration uses:
 
 ```text
 PBKDF2-HMAC-SHA256
@@ -663,44 +1283,44 @@ PBKDF2-HMAC-SHA256
 
 ---
 
-# 22. AES-256-GCM
+# 39. AES-256-GCM
 
-The encrypted implementation uses AES-GCM through the Python `cryptography` library.
+The encrypted implementation uses AES-GCM.
 
 The encryption process is:
 
 ```text
 Plaintext
-   |
-   v
+    |
+    v
 AES-256-GCM
-   |
-   +---- Ciphertext
-   |
-   +---- Authentication Tag
+    |
+    +---- Ciphertext
+    |
+    +---- Authentication Tag
 ```
 
-The implementation generates a random 12-byte nonce.
+A random 12-byte nonce is generated for every encryption operation.
 
-The final encrypted data returned by `encrypt_data()` is:
+The encrypted data contains:
 
 ```text
 salt + nonce + ciphertext
 ```
 
-The authentication tag is included as part of the AES-GCM ciphertext produced by the `cryptography` library.
+The AES-GCM authentication tag is included in the generated ciphertext.
 
 ---
 
-# 23. Secure Image Payload
+# 40. Secure Image Payload
 
-The encrypted-image implementation is contained in:
+The encrypted image implementation is contained in:
 
 ```text
 src/encrypted_steg.py
 ```
 
-The module uses a payload header containing:
+The payload contains a header with:
 
 ```text
 Magic
@@ -708,19 +1328,14 @@ Version
 Payload Length
 ```
 
-The current encrypted payload identifier is:
+Current values:
 
 ```text
-ESTG
+Magic   = ESTG
+Version = 1
 ```
 
-and the current payload version is:
-
-```text
-1
-```
-
-The payload structure is conceptually:
+Conceptually:
 
 ```text
 +----------------+---------+----------------+
@@ -730,15 +1345,13 @@ The payload structure is conceptually:
 +---------------------------------------------+
 ```
 
-The encrypted payload itself contains the cryptographic data produced by `src/crypto_utils.py`.
-
 ---
 
-# 24. Secret Image Serialization
+# 41. Secret Image Serialization
 
-Before encryption, the secret image is converted into a byte representation.
+Before encryption, the secret image is serialized.
 
-The serialized image contains:
+The serialized format contains:
 
 ```text
 4 bytes  → Magic
@@ -748,7 +1361,7 @@ The serialized image contains:
 Remaining → RGB pixel data
 ```
 
-The image serialization uses:
+Current serialization metadata:
 
 ```text
 Magic   = STG1
@@ -757,177 +1370,134 @@ Version = 1
 
 The secret image is converted to RGB before serialization.
 
-During decryption, the stored dimensions and RGB pixel data are used to reconstruct the original image.
-
 ---
 
-# 25. Secure Image Encode
-
-The secure CLI command is:
-
-```text
-secure-image-encode
-```
-
-It requires:
-
-```text
---cover
---secret
---password
---output
-```
+# 42. Secure Image Encoding
 
 Example:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py secure-image-encode --cover images/cover.png --secret images/secret.png --password ProjectPassword123 --output encrypted_stego.png
+py src/steg.py secure-image-encode --cover images/cover.png --secret images/secret.png --password ProjectPassword123 --output output/encrypted_stego.png
 ```
 
-The operation performs:
+The process is:
 
 ```text
 1. Read cover image
 2. Read secret image
 3. Serialize secret image
 4. Generate random salt
-5. Derive AES-256 key using PBKDF2
+5. Derive AES-256 key
 6. Generate random nonce
 7. Encrypt using AES-GCM
-8. Add encrypted payload header
+8. Construct encrypted payload
 9. Embed payload using (3,3,2)
 10. Save encrypted stego image
 ```
 
-Successful output:
-
-```text
-Encrypted image steganography successful.
-Stego image: encrypted_stego.png
-```
-
 ---
 
-# 26. Secure Image Decode
-
-The secure CLI command is:
-
-```text
-secure-image-decode
-```
-
-It requires:
-
-```text
---image
---password
---output
-```
+# 43. Secure Image Decoding
 
 Example:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py secure-image-decode --image encrypted_stego.png --password ProjectPassword123 --output recovered_secret.png
+py src/steg.py secure-image-decode --image output/encrypted_stego.png --password ProjectPassword123 --output output/recovered_secret.png
 ```
 
-The operation performs:
+The decoder performs:
 
 ```text
 1. Read encrypted stego image
-2. Extract the payload header
-3. Validate the payload magic
-4. Validate the payload version
+2. Extract payload header
+3. Validate payload magic
+4. Validate payload version
 5. Extract encrypted data
-6. Read the stored salt
-7. Read the stored nonce
-8. Derive the AES key from the supplied password
+6. Read stored salt
+7. Read stored nonce
+8. Derive AES key
 9. Authenticate and decrypt using AES-GCM
-10. Validate serialized image data
-11. Reconstruct the RGB image
-12. Save the recovered secret image
-```
-
-Successful output:
-
-```text
-Encrypted image recovery successful.
-Recovered image: recovered_secret.png
+10. Validate serialized image
+11. Reconstruct RGB image
+12. Save recovered image
 ```
 
 ---
 
-# 27. Wrong Password Handling
+# 44. Wrong Password Handling
 
-The secure decoder uses AES-GCM authentication to verify that the supplied password/key is correct.
+AES-GCM authentication allows the decoder to detect an incorrect password.
 
-For example:
+Example:
 
 ```bash
-.venv/Scripts/python.exe src/steg.py secure-image-decode --image encrypted_stego.png --password WrongPassword123 --output wrong.png
+py src/steg.py secure-image-decode --image output/encrypted_stego.png --password WrongPassword123 --output output/wrong.png
 ```
 
-The cryptographic layer raises:
+The cryptographic layer reports:
 
 ```text
 Decryption failed. Incorrect password or corrupted data.
 ```
 
-The CLI reports the error rather than producing invalid decrypted image data.
+The decoder does not produce an unauthenticated decrypted image.
 
 ---
 
-# 28. Corrupted Data Handling
+# 45. Corrupted Data Detection
 
-The secure pipeline also detects invalid encrypted data.
+The encrypted workflow also detects modification of encrypted data.
 
-If encrypted data is modified, AES-GCM authentication fails.
+If encrypted payload data is changed:
 
-The cryptographic module handles the failure and reports:
+```text
+Encrypted Data
+      |
+      v
+Modification
+      |
+      v
+AES-GCM Authentication
+      |
+      v
+Authentication Failure
+```
+
+The system reports:
 
 ```text
 Decryption failed. Incorrect password or corrupted data.
 ```
 
-If corruption occurs in the image container itself rather than the encrypted payload, Pillow may reject the image before the cryptographic stage is reached.
-
-Therefore, corrupted input may produce either:
-
-```text
-Decryption failed. Incorrect password or corrupted data.
-```
-
-or an image-processing error such as:
-
-```text
-broken data stream when reading image file
-```
-
-depending on where the corruption occurs.
+If corruption occurs in the image container itself, Pillow may detect the problem before the cryptographic layer is reached.
 
 ---
 
-# 29. Pixel-Perfect Secure Image Recovery
+# 46. Pixel-Perfect Secure Image Recovery
 
-The normal `(3,3,2)` image-steganography implementation is intentionally a reduced representation of the secret image.
+Normal image steganography stores a reduced representation of the secret image.
 
 The encrypted workflow is different.
 
-The secret image is serialized into its complete RGB pixel data **before encryption**:
+The complete RGB image is serialized before encryption:
 
 ```text
 Original RGB Image
        |
        v
-Raw RGB Bytes
+Complete RGB Bytes
        |
        v
 Encryption
        |
        v
-Embedding
+Encrypted Payload
+       |
+       v
+Steganographic Embedding
 ```
 
-After extraction and decryption:
+After extraction:
 
 ```text
 Encrypted Payload
@@ -942,109 +1512,194 @@ Original RGB Bytes
 Image Reconstruction
 ```
 
-Therefore, the secure image workflow can recover the original secret image pixel-for-pixel.
+Therefore, the secure image pipeline can reconstruct the original secret image **pixel-for-pixel**.
 
-The project test suite verifies this property.
+This property is verified by the automated test suite.
 
 ---
 
-# 30. Normal vs Secure Image Steganography
+# 47. Normal vs Secure Image Steganography
 
-| Feature                  | `image-encode` | `secure-image-encode` |
-| ------------------------ | -------------- | --------------------- |
-| Secret                   | Image          | Image                 |
-| Encryption               | No             | Yes                   |
-| AES-GCM                  | No             | Yes                   |
-| PBKDF2                   | No             | Yes                   |
-| Password                 | No             | Yes                   |
-| `(3,3,2)` embedding      | Yes            | Yes                   |
-| Pixel-perfect recovery   | No             | Yes                   |
-| Authentication           | No             | Yes                   |
-| Wrong-password detection | No             | Yes                   |
-| Corruption detection     | Limited        | Yes                   |
+| Feature                  | Normal Image Steganography | Secure Image Steganography |
+| ------------------------ | -------------------------- | -------------------------- |
+| Secret                   | Image                      | Image                      |
+| Encryption               | No                         | Yes                        |
+| AES-GCM                  | No                         | Yes                        |
+| PBKDF2                   | No                         | Yes                        |
+| Password                 | No                         | Yes                        |
+| `(3,3,2)` embedding      | Yes                        | Yes                        |
+| Pixel-perfect recovery   | No                         | Yes                        |
+| Authentication           | No                         | Yes                        |
+| Wrong-password detection | No                         | Yes                        |
+| Corruption detection     | Limited                    | Yes                        |
 
-The secure implementation therefore provides a layered model:
+The secure implementation therefore follows:
 
 ```text
-Cryptography
-     +
-Steganography
+Secret Image
+     |
+     v
+Encryption
+     |
+     v
+Encrypted Data
+     |
+     v
+Steganographic Embedding
+     |
+     v
+Cover Image
 ```
 
-rather than relying on steganography alone.
+This means that even if an attacker discovers that data is hidden inside the image, the original secret is still protected by encryption.
 
 ---
 
-# 31. Automated Testing
+# 48. Automated Testing
 
-The project uses `pytest`.
+The project uses `pytest` for automated testing.
 
 Run the complete test suite with:
 
 ```bash
-.venv/Scripts/python.exe -m pytest -q
+py -m pytest -v
 ```
 
-The current test result is:
+Current verified result:
 
 ```text
-32 passed
+42 passed in 7.01s
 ```
 
 Therefore:
 
 ```text
 ==============================
-32 passed
+42 / 42 TESTS PASSING
 ==============================
 ```
 
-The test suite covers:
-
-* Basic text steganography
-* UTF-8 handling
-* LSB `(3,3,2)`
-* Spiral `(3,3,2)`
-* CLI behaviour
-* Image capacity
-* Password validation
-* PBKDF2 key derivation
-* AES-GCM encryption/decryption
-* Encrypted image serialization
-* Encrypted image embedding/extraction
-* Wrong-password handling
-* Corrupted encrypted data handling
-* Pixel-perfect encrypted image recovery
-
----
-
-# 32. Testing Structure
-
-The six current test modules are:
+The current test distribution is:
 
 ```text
-tests/
-│
-├── test_steganography.py
-│
-├── test_lsb332.py
-│
-├── test_spiral332.py
-│
-├── test_cli.py
-│
-├── test_crypto_utils.py
-│
-└── test_encrypted_steg.py
+Adaptive332          10 tests
+CLI                   5 tests
+Crypto utilities      6 tests
+Encrypted steganography
+                      6 tests
+LSB332                4 tests
+Spiral332             6 tests
+Basic steganography   4 tests
+------------------------------
+TOTAL                42 tests
 ```
-
-Each module focuses on a specific layer of the implementation.
 
 ---
 
-# 33. Git Workflow
+# 49. Adaptive332 Test Coverage
 
-The project is maintained using Git.
+The Adaptive332 test module validates:
+
+* Green channel selection
+* Blue channel selection
+* Green indicator generation
+* Blue indicator generation
+* Adaptive Green embedding
+* Adaptive Blue embedding
+* Indicator preservation
+* Green-channel round trip
+* Blue-channel round trip
+* Expected reduced-bit reconstruction
+
+Example:
+
+```bash
+py -m pytest tests/test_adaptive332.py -v
+```
+
+Current result:
+
+```text
+10 passed
+```
+
+---
+
+# 50. Full Test Command
+
+The complete project can be tested using:
+
+```bash
+py -m pytest -v
+```
+
+A successful run currently produces:
+
+```text
+42 passed in 7.01s
+```
+
+This confirms that the addition of Adaptive332 did not break the existing:
+
+```text
+Text Steganography
+        +
+LSB332
+        +
+Spiral332
+        +
+CLI
+        +
+Cryptography
+        +
+Encrypted Steganography
+```
+
+functionality.
+
+---
+
+# 51. Example Adaptive332 Test
+
+A simplified Adaptive332 test scenario is:
+
+```text
+Cover:
+
+R = 100
+G = 50
+B = 100
+
+        |
+        v
+
+G <= B
+
+        |
+        v
+
+Green selected
+
+        |
+        v
+
+Red   → 1 payload bit
+Green → 4 payload bits
+Blue  → 3 payload bits
+
+        |
+        v
+
+Indicator = 00
+```
+
+The decoder reads the indicator and reconstructs the corresponding reduced-bit RGB pixel.
+
+---
+
+# 52. Git Workflow
+
+The project uses Git for version control.
 
 Check repository status:
 
@@ -1064,10 +1719,10 @@ Commit changes:
 git commit -m "Update README documentation"
 ```
 
-Push to the main branch:
+Push changes:
 
 ```bash
-git push
+git push origin main
 ```
 
 The repository is:
@@ -1076,11 +1731,25 @@ The repository is:
 The-Plunderer/steganography-project
 ```
 
+The Adaptive332 implementation was committed as:
+
+```text
+769dbad
+```
+
+with commit message:
+
+```text
+Add adaptive332 image steganography
+```
+
+The working tree was verified clean after the implementation was pushed.
+
 ---
 
-# 34. Current Implementation Status
+# 53. Current Implementation Status
 
-### Completed
+## Completed
 
 * [x] Basic text steganography
 * [x] UTF-8 text support
@@ -1089,6 +1758,11 @@ The-Plunderer/steganography-project
 * [x] Image-to-image steganography
 * [x] LSB `(3,3,2)`
 * [x] Spiral `(3,3,2)`
+* [x] Adaptive332
+* [x] Adaptive Green/Blue selection
+* [x] Red-channel 2-bit indicator
+* [x] Adaptive332 CLI integration
+* [x] Image capacity validation
 * [x] Unified CLI
 * [x] AES-256-GCM encryption
 * [x] PBKDF2-HMAC-SHA256
@@ -1101,28 +1775,34 @@ The-Plunderer/steganography-project
 * [x] Corruption detection
 * [x] Pixel-perfect encrypted image recovery
 * [x] Automated test suite
-* [x] 32/32 tests passing
+* [x] **42/42 tests passing**
 
-### Planned
+## Planned
 
 * [ ] Visual Cryptography
+* [ ] 2-out-of-2 visual cryptography
 * [ ] Multiple visual shares
 * [ ] Secret reconstruction from shares
 * [ ] Colour Visual Cryptography
+* [ ] Threshold schemes
 * [ ] Image-quality evaluation
 * [ ] PSNR analysis
 * [ ] Pixel-expansion analysis
-* [ ] Security and performance evaluation
+* [ ] Contrast analysis
+* [ ] Security evaluation
+* [ ] Performance benchmarking
+* [ ] Steganalysis evaluation
+* [ ] Web interface
 
 ---
 
-# 35. Visual Cryptography — Planned Stage
+# 54. Visual Cryptography — Next Major Stage
 
 Visual Cryptography is the next major component of the project.
 
 The intended concept is to divide a secret image into multiple shares.
 
-For example:
+For a basic 2-out-of-2 scheme:
 
 ```text
              Secret Image
@@ -1141,108 +1821,166 @@ For example:
             Reconstruction
                   |
                   v
-          Secret Image
+             Secret Image
 ```
 
-The future implementation can investigate:
+The individual shares should not independently reveal the complete secret.
 
-* 2-out-of-2 schemes
-* k-out-of-n threshold schemes
-* Colour visual cryptography
+The reconstruction process combines the required shares.
+
+---
+
+# 55. Future Visual Cryptography Research
+
+The Visual Cryptography stage will investigate:
+
+### 2-out-of-2 schemes
+
+```text
+Share 1 + Share 2
+       |
+       v
+   Secret Image
+```
+
+### k-out-of-n schemes
+
+```text
+n generated shares
+        |
+        v
+Any k valid shares
+        |
+        v
+Secret reconstruction
+```
+
+### Colour Visual Cryptography
+
+The project will also investigate colour-based visual cryptographic schemes.
+
+Important research parameters include:
+
 * Pixel expansion
-* Reconstruction quality
 * Contrast
+* Reconstruction quality
 * Computational complexity
+* Share size
+* Colour preservation
+* PSNR
+* Security
+* Threshold behaviour
 
 ---
 
-# 36. Future Development
+# 56. Planned Project Evolution
 
-Potential future improvements include:
+The overall project is progressing through several stages:
 
-## Steganography
-
-* Additional embedding algorithms
-* Adaptive steganography
-* Improved payload capacity
-* Colour-channel analysis
-* Steganalysis resistance
-* Image-quality measurements
-
-## Cryptography
-
-* Configurable cryptographic parameters
-* Improved password policies
-* Additional authenticated-encryption schemes
-* More detailed key-management mechanisms
-
-## Visual Cryptography
-
-* 2-out-of-2 visual cryptography
-* k-out-of-n threshold schemes
-* Colour visual cryptography
-* Improved reconstruction quality
-* Reduced pixel expansion
-
-## Application
-
-* Web interface
-* Drag-and-drop image processing
-* Secure file embedding
-* Share generation
-* Performance benchmarking
+```text
+Stage 1
+Basic Text Steganography
+        |
+        v
+Stage 2
+Image Steganography
+        |
+        v
+Stage 3
+LSB332
+        |
+        v
+Stage 4
+Spiral332
+        |
+        v
+Stage 5
+Adaptive332
+        |
+        v
+Stage 6
+Cryptography + Steganography
+        |
+        v
+Stage 7
+Visual Cryptography
+        |
+        v
+Stage 8
+Colour Visual Cryptography
+        |
+        v
+Stage 9
+Evaluation and Comparison
+```
 
 ---
 
-# 37. Project Architecture
+# 57. Project Architecture
 
 The current architecture can be summarized as:
 
 ```text
-                         CLI
-                      src/steg.py
-                          |
-          +---------------+---------------+
-          |               |               |
-          v               v               v
-       Text           Image           Secure Image
-    Steganography   Steganography    Steganography
-          |               |               |
-          v               v               v
-     encoder.py     lsb332.py       encrypted_steg.py
-     decoder.py     spiral332.py           |
-                                           v
-                                    crypto_utils.py
-                                           |
-                                           v
-                                    PBKDF2 + AES-GCM
+                           CLI
+                       src/steg.py
+                           |
+        +------------------+------------------+
+        |                  |                  |
+        v                  v                  v
+      TEXT               IMAGE             SECURE
+   STEGANOGRAPHY      STEGANOGRAPHY     STEGANOGRAPHY
+        |                  |                  |
+        |          +-------+--------+         |
+        |          |       |        |         |
+        v          v       v        v         v
+   encoder.py   lsb332  spiral   adaptive   encrypted_steg
+   decoder.py    .py     332.py    332.py        |
+                                             +----+----+
+                                             |         |
+                                             v         v
+                                        crypto_utils  AES-GCM
+                                             |
+                                             v
+                                      PBKDF2-HMAC-SHA256
 ```
 
-This separates the project into independent functional layers while allowing them to be accessed through a single CLI.
+The future architecture will add:
+
+```text
+                 Visual Cryptography
+                         |
+              +----------+----------+
+              |                     |
+              v                     v
+          Share Generation     Reconstruction
+              |
+              v
+       Colour VC / Threshold
+```
 
 ---
 
-# 38. Security Model
+# 58. Security Model
 
-The secure image workflow uses two independent security concepts:
+The project uses two complementary security concepts.
 
-### Steganography
+## Steganography
 
-Attempts to conceal the existence of the communication.
+Steganography attempts to conceal the existence of information.
 
 ```text
 "Hide the data."
 ```
 
-### Cryptography
+## Cryptography
 
-Protects the contents of the hidden data.
+Cryptography protects the contents of the information.
 
 ```text
 "Protect the data even if it is discovered."
 ```
 
-The project combines them:
+Together:
 
 ```text
 Secret Image
@@ -1257,78 +1995,374 @@ Encrypted Data
 Steganographic Embedding
      |
      v
-Cover Image
+Stego Image
 ```
 
-Consequently, discovering the hidden payload does not by itself reveal the original secret image.
+Therefore:
+
+```text
+Steganography
+       +
+Cryptography
+       =
+Layered Protection
+```
 
 ---
 
-# 39. Limitations
+# 59. Research Comparison
+
+The current implementation provides several approaches that can be compared experimentally.
+
+| Method       | Traversal  | Allocation    | Adaptive | Encryption |
+| ------------ | ---------- | ------------- | -------- | ---------- |
+| LSB332       | Sequential | 3-3-2         | No       | No         |
+| Spiral332    | Spiral     | 3-3-2         | No       | No         |
+| Adaptive332  | Sequential | 1 + 4/3 + 3/4 | Yes      | No         |
+| Secure Image | Sequential | 3-3-2 payload | No       | AES-GCM    |
+
+Potential comparison metrics include:
+
+```text
+Capacity
+   |
+   +-- Payload per pixel
+
+Image Quality
+   |
+   +-- PSNR
+   +-- MSE
+
+Security
+   |
+   +-- Payload protection
+   +-- Authentication
+   +-- Steganalysis resistance
+
+Performance
+   |
+   +-- Encoding time
+   +-- Decoding time
+
+Adaptive behaviour
+   |
+   +-- Green/Blue selection frequency
+   +-- Channel modification
+```
+
+---
+
+# 60. Limitations
 
 The current implementation is an educational and research prototype.
 
 Important limitations include:
 
-1. Basic steganography does not guarantee resistance against steganalysis.
-2. Image transformations such as resizing or compression may destroy embedded data.
-3. Password security depends on the strength of the password supplied by the user.
-4. The current encrypted workflow is designed for project demonstration and research rather than production deployment.
-5. The secure payload still depends on successful preservation of the stego image.
-6. Visual Cryptography has not yet been implemented.
+1. Basic steganography does not guarantee resistance against advanced steganalysis.
+2. Image transformations such as resizing, recompression, or aggressive editing may destroy embedded data.
+3. Normal LSB332, Spiral332, and Adaptive332 use reduced-bit secret representations and therefore do not provide exact RGB recovery.
+4. The secure pipeline provides pixel-perfect recovery because the complete image is serialized before encryption.
+5. Password security depends on the strength of the password supplied by the user.
+6. The current encrypted workflow is intended for project research and demonstration rather than production deployment.
+7. Adaptive332 currently reserves indicator values `10` and `11`, but the decoder currently maps them to Green rather than rejecting them.
+8. Visual Cryptography has not yet been implemented.
+9. Colour Visual Cryptography and threshold schemes are still future work.
+10. Steganalysis resistance has not yet been experimentally evaluated.
 
 ---
 
-# 40. Conclusion
+# 61. Current Project Milestone
 
-The project has progressed from basic text steganography to a layered **cryptography + steganography** implementation.
+The current implementation has reached the following milestone:
+
+```text
+                 PROJECT STATUS
+                       |
+       +---------------+---------------+
+       |               |               |
+       v               v               v
+  Steganography   Cryptography      Testing
+       |               |               |
+       v               v               v
+   LSB332          AES-GCM          42/42
+   Spiral332       PBKDF2           PASSING
+   Adaptive332     Secure Image
+       |               |
+       +-------+-------+
+               |
+               v
+        Secure Steganography
+               |
+               v
+       Visual Cryptography
+          NEXT STAGE
+```
+
+---
+
+# 62. Conclusion
+
+The project has progressed from a basic text-steganography implementation into a multi-layer image security system combining **steganography, adaptive information hiding, and cryptography**.
 
 The current system supports:
 
 ```text
 Text Steganography
-       +
+        +
 Image Steganography
-       +
+        +
 LSB (3,3,2)
-       +
+        +
 Spiral (3,3,2)
-       +
+        +
+Adaptive332
+        +
 AES-256-GCM
-       +
+        +
 PBKDF2-HMAC-SHA256
-       +
+        +
 Authenticated Encrypted Image Embedding
+        +
+Automated Testing
 ```
 
-The secure-image workflow encrypts the complete secret image before embedding it into a cover image. AES-GCM provides confidentiality and authentication, while PBKDF2-HMAC-SHA256 derives a 256-bit encryption key from the user's password.
+The Adaptive332 implementation extends the project beyond fixed bit allocation. It dynamically chooses between the Green and Blue channels according to their relative intensity and stores the selected channel using a 2-bit indicator in the Red channel.
 
-The current implementation has also been validated through an automated test suite with:
+The current Adaptive332 design maintains:
 
 ```text
-32 / 32 tests passing
+1 Red payload bit
++
+4 payload bits in selected channel
++
+3 payload bits in remaining channel
+=
+8 payload bits per cover pixel
 ```
 
-The next major stage is **Visual Cryptography**, which will extend the project from single-image information hiding toward multi-share secret reconstruction.
+The encrypted image pipeline provides an additional security layer by encrypting the complete secret image before embedding it. AES-256-GCM provides authenticated encryption, while PBKDF2-HMAC-SHA256 derives the encryption key from the user's password.
 
-The overall project direction is therefore:
+The implementation has been validated using the complete automated test suite:
 
 ```text
-        INFORMATION HIDING
-                |
-        +-------+-------+
-        |               |
-        v               v
-   STEGANOGRAPHY    CRYPTOGRAPHY
-        |               |
-        +-------+-------+
-                |
-                v
-      SECURE IMAGE SYSTEM
-                |
-                v
-       VISUAL CRYPTOGRAPHY
-                |
-                v
-       COMPLETE PROJECT
+42 / 42 tests passing
 ```
+
+The next major stage is **Visual Cryptography**, where the project will move from hiding information inside a single image toward generating multiple shares and reconstructing a secret through share combination.
+
+The overall direction of the project is therefore:
+
+```text
+              INFORMATION HIDING
+                       |
+              +--------+--------+
+              |                 |
+              v                 v
+       STEGANOGRAPHY       CRYPTOGRAPHY
+              |                 |
+       +------+-----+           |
+       |      |     |           |
+      LSB   Spiral Adaptive     |
+       |      |     |           |
+       +------+-----+           |
+              |                 |
+              +--------+--------+
+                       |
+                       v
+              SECURE STEGANOGRAPHY
+                       |
+                       v
+              VISUAL CRYPTOGRAPHY
+                       |
+                       v
+            COLOUR VISUAL CRYPTOGRAPHY
+                       |
+                       v
+             COMPLETE RESEARCH SYSTEM
+```
+
+---
+
+# 63. Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/The-Plunderer/steganography-project.git
+```
+
+Enter the project directory:
+
+```bash
+cd steganography-project
+```
+
+Install dependencies:
+
+```bash
+py -m pip install -r requirements.txt
+```
+
+Check the CLI:
+
+```bash
+py src/steg.py --help
+```
+
+Run all tests:
+
+```bash
+py -m pytest -v
+```
+
+Expected current result:
+
+```text
+42 passed
+```
+
+---
+
+# 64. Example Complete Workflow
+
+### Step 1 — Encode text
+
+```bash
+py src/steg.py encode --image images/cover.png --message "Hello from Steganography!" --output output/stego_text.png
+```
+
+### Step 2 — Decode text
+
+```bash
+py src/steg.py decode --image output/stego_text.png
+```
+
+### Step 3 — Encode using LSB332
+
+```bash
+py src/steg.py image-encode --method lsb332 --cover images/cover.png --secret images/secret.png --output output/stego_lsb332.png
+```
+
+### Step 4 — Encode using Spiral332
+
+```bash
+py src/steg.py image-encode --method spiral332 --cover images/cover.png --secret images/secret.png --output output/stego_spiral332.png
+```
+
+### Step 5 — Encode using Adaptive332
+
+```bash
+py src/steg.py image-encode --method adaptive332 --cover images/cover.png --secret images/secret.png --output output/stego_adaptive332.png
+```
+
+### Step 6 — Decode Adaptive332
+
+```bash
+py src/steg.py image-decode --method adaptive332 --image output/stego_adaptive332.png --output output/recovered_adaptive332.png
+```
+
+### Step 7 — Secure image encoding
+
+```bash
+py src/steg.py secure-image-encode --cover images/cover.png --secret images/secret.png --password ProjectPassword123 --output output/encrypted_stego.png
+```
+
+### Step 8 — Secure image decoding
+
+```bash
+py src/steg.py secure-image-decode --image output/encrypted_stego.png --password ProjectPassword123 --output output/recovered_secret.png
+```
+
+---
+
+# 65. Development Status
+
+```text
+Current Branch:
+main
+
+Current Adaptive332 Commit:
+769dbad
+
+Current Test Status:
+42 / 42 passing
+
+Current Major Stage:
+Steganography + Cryptography
+
+Next Major Stage:
+Visual Cryptography
+```
+
+---
+
+# 66. Future Development Roadmap
+
+```text
+[x] Basic text steganography
+[x] UTF-8 support
+[x] Image steganography
+[x] LSB332
+[x] Spiral332
+[x] Adaptive332
+[x] Unified CLI
+[x] AES-256-GCM
+[x] PBKDF2-HMAC-SHA256
+[x] Secure image steganography
+[x] Automated testing
+[x] 42/42 tests passing
+
+[ ] Visual Cryptography
+[ ] 2-out-of-2 shares
+[ ] Threshold Visual Cryptography
+[ ] Colour Visual Cryptography
+[ ] Share reconstruction
+[ ] PSNR evaluation
+[ ] Pixel-expansion evaluation
+[ ] Contrast evaluation
+[ ] Steganalysis evaluation
+[ ] Performance benchmarking
+[ ] Web interface
+```
+
+---
+
+# 67. Final Project Direction
+
+The final system is intended to combine:
+
+```text
+             ┌──────────────────────┐
+             │  INFORMATION HIDING  │
+             └──────────┬───────────┘
+                        |
+             ┌──────────+───────────┐
+             |                      |
+             v                      v
+      Steganography            Cryptography
+             |                      |
+       +-----+------+          AES-256-GCM
+       |     |      |          PBKDF2-SHA256
+      LSB  Spiral Adaptive           |
+       |     |      |                |
+       +-----+------+----------------+
+                    |
+                    v
+          Secure Image System
+                    |
+                    v
+          Visual Cryptography
+                    |
+                    v
+       Colour Visual Cryptography
+                    |
+                    v
+       Evaluation & Comparison
+                    |
+                    v
+           FINAL PROJECT
+```
+
+The project therefore evolves from **basic information hiding** toward a complete research-oriented system combining:
+
+**Steganography + Adaptive Steganography + Cryptography + Visual Cryptography.**

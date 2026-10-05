@@ -13,6 +13,11 @@ from spiral332 import (
     decode_image as spiral_decode_image
 )
 
+from adaptive332 import (
+    encode_image as adaptive_encode_image,
+    decode_image as adaptive_decode_image
+)
+
 from encrypted_steg import (
     encrypt_and_embed,
     extract_and_decrypt
@@ -30,6 +35,9 @@ def get_image_encoder(method):
     if method == "spiral332":
         return spiral_encode_image
 
+    if method == "adaptive332":
+        return adaptive_encode_image
+
     raise ValueError(
         f"Unsupported image encoding method: {method}"
     )
@@ -45,6 +53,9 @@ def get_image_decoder(method):
 
     if method == "spiral332":
         return spiral_decode_image
+
+    if method == "adaptive332":
+        return adaptive_decode_image
 
     raise ValueError(
         f"Unsupported image decoding method: {method}"
@@ -128,7 +139,7 @@ def main():
 
     image_encode_parser.add_argument(
         "--method",
-        choices=["lsb332", "spiral332"],
+        choices=["lsb332", "spiral332", "adaptive332"],
         required=True,
         help="Steganography method"
     )
@@ -161,7 +172,7 @@ def main():
 
     image_decode_parser.add_argument(
         "--method",
-        choices=["lsb332", "spiral332"],
+        choices=["lsb332", "spiral332", "adaptive332"],
         required=True,
         help="Steganography method"
     )

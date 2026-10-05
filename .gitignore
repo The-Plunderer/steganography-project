@@ -21,3 +21,8 @@ output/
 # Local test secret
 secret.txt
 tests/test_data/
+
+# Generated steganography outputs
+*_stego.png
+recovered_*.png
+wrong.png

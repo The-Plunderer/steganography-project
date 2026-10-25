@@ -2,3 +2,6 @@ Pillow
 numpy
 pytest
 cryptography
+qrcode[pil]
+opencv-python-headless
+zxing-cpp

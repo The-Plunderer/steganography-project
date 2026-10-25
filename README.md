@@ -94,7 +94,10 @@ The main objectives of this project are to:
 | Python 3          | Main programming language             |
 | Pillow            | Image loading, processing, and saving |
 | NumPy             | Pixel and image-array manipulation    |
-| cryptography      | AES-GCM and PBKDF2 implementation     |
+| cryptography      | AES-GCM, key derivation, and cryptographic operations |
+| qrcode[pil]       | QR-code generation                    |
+| opencv-python-headless | QR image processing and scanning |
+| zxing-cpp         | QR-code decoding support              |
 | pytest            | Automated testing                     |
 | Git               | Version control                       |
 | GitHub            | Repository hosting                    |
@@ -114,6 +117,9 @@ Pillow
 numpy
 pytest
 cryptography
+qrcode[pil]
+opencv-python-headless
+zxing-cpp
 ```
 
 ---
@@ -135,6 +141,8 @@ steganography-project/
 │   ├── decoder.py
 │   ├── encoder.py
 │   ├── encrypted_steg.py
+│   ├── qr_secure.py
+│   ├── qr_contact.py
 │   ├── lsb332.py
 │   ├── spiral332.py
 │   └── steg.py
@@ -144,6 +152,8 @@ steganography-project/
 │   ├── test_cli.py
 │   ├── test_crypto_utils.py
 │   ├── test_encrypted_steg.py
+│   ├── test_qr_secure.py
+│   ├── test_qr_contact.py
 │   ├── test_lsb332.py
 │   ├── test_spiral332.py
 │   └── test_steganography.py
@@ -169,6 +179,8 @@ Generated output images are used during testing and command execution but are no
 | `src/adaptive332.py`    | Adaptive Green/Blue image steganography                            |
 | `src/crypto_utils.py`   | PBKDF2 key derivation and AES-GCM encryption/decryption            |
 | `src/encrypted_steg.py` | Serializes, encrypts, embeds, extracts, and decrypts secret images |
+| `src/qr_secure.py`     | Recipient-based encrypted QR messaging using RSA-OAEP and AES-GCM |
+| `src/qr_contact.py`    | Contact QR generation/scanning and vCard export                 |
 
 ---
 
@@ -183,6 +195,8 @@ Generated output images are used during testing and command execution but are no
 | `tests/test_cli.py`            | Unified CLI behaviour                       |
 | `tests/test_crypto_utils.py`   | Cryptographic utilities                     |
 | `tests/test_encrypted_steg.py` | Encrypted image steganography               |
+| `tests/test_qr_secure.py`      | Secure encrypted QR messaging               |
+| `tests/test_qr_contact.py`     | Contact QR and vCard functionality          |
 
 ---
 
@@ -1148,13 +1162,13 @@ followed by conversion from bits to bytes.
 
 # 35. Unified CLI
 
-All major functionality is exposed through:
+All major functionality is exposed through `src/steg.py`. Check available commands and exact options with:
 
-```text
-src/steg.py
+```bash
+py src/steg.py --help
 ```
 
-The current command structure includes:
+The command set includes text and image steganography, encrypted image steganography, secure QR messaging, and contact QR/vCard operations:
 
 ```text
 encode
@@ -1164,13 +1178,49 @@ image-encode
 image-decode
 secure-image-encode
 secure-image-decode
+contact-qr-create
+contact-qr-scan
+contact-export
+secure-qr-keygen
+secure-qr-create
+secure-qr-decrypt
 ```
 
-To view the available commands:
+## Secure QR Messaging
+
+Secure QR messaging encrypts a message before placing the encrypted payload in a QR code. It uses AES-256-GCM for authenticated encryption and RSA-OAEP with SHA-256 to wrap the AES key for the recipient.
+
+Generate a recipient key pair:
 
 ```bash
-py src/steg.py --help
+py src/steg.py secure-qr-keygen --private-key keys/recipient_private.pem --public-key keys/recipient_public.pem
 ```
+
+Create a secure QR code:
+
+```bash
+py src/steg.py secure-qr-create --message "Confidential message" --public-key keys/recipient_public.pem --output output/secure_message.png
+```
+
+Decrypt the QR payload:
+
+```bash
+py src/steg.py secure-qr-decrypt --image output/secure_message.png --private-key keys/recipient_private.pem
+```
+
+Use command-specific help to confirm exact options. Never commit the recipient private key; the project ignores the `keys/` directory and private-key files.
+
+## Contact QR and vCard
+
+Contact QR functionality creates contact QR codes using vCard data, scans QR images, and exports contact data as a `.vcf` file. Contact creation requires the explicit `--consent` flag.
+
+```bash
+py src/steg.py contact-qr-create --help
+py src/steg.py contact-qr-scan --help
+py src/steg.py contact-export --help
+```
+
+Use these help commands to confirm required fields and output options. Only encode contact information with the person's permission.
 
 For image encoding:
 
@@ -1568,14 +1618,14 @@ py -m pytest -v
 Current verified result:
 
 ```text
-42 passed in 7.01s
+57 passed in 8.58s
 ```
 
 Therefore:
 
 ```text
 ==============================
-42 / 42 TESTS PASSING
+57 TESTS PASSING
 ==============================
 ```
 
@@ -1591,7 +1641,7 @@ LSB332                4 tests
 Spiral332             6 tests
 Basic steganography   4 tests
 ------------------------------
-TOTAL                42 tests
+TOTAL                57 tests
 ```
 
 ---
@@ -1636,7 +1686,7 @@ py -m pytest -v
 A successful run currently produces:
 
 ```text
-42 passed in 7.01s
+57 passed in 8.58s
 ```
 
 This confirms that the addition of Adaptive332 did not break the existing:
@@ -1775,7 +1825,7 @@ The working tree was verified clean after the implementation was pushed.
 * [x] Corruption detection
 * [x] Pixel-perfect encrypted image recovery
 * [x] Automated test suite
-* [x] **42/42 tests passing**
+* [x] **57 passing tests passing**
 
 ## Planned
 
@@ -2084,7 +2134,7 @@ The current implementation has reached the following milestone:
   Steganography   Cryptography      Testing
        |               |               |
        v               v               v
-   LSB332          AES-GCM          42/42
+   LSB332          AES-GCM          57 passing
    Spiral332       PBKDF2           PASSING
    Adaptive332     Secure Image
        |               |
@@ -2145,7 +2195,7 @@ The encrypted image pipeline provides an additional security layer by encrypting
 The implementation has been validated using the complete automated test suite:
 
 ```text
-42 / 42 tests passing
+57 tests passing
 ```
 
 The next major stage is **Visual Cryptography**, where the project will move from hiding information inside a single image toward generating multiple shares and reconstructing a secret through share combination.
@@ -2218,7 +2268,7 @@ py -m pytest -v
 Expected current result:
 
 ```text
-42 passed
+57 passed
 ```
 
 ---
@@ -2285,7 +2335,7 @@ Current Adaptive332 Commit:
 769dbad
 
 Current Test Status:
-42 / 42 passing
+57 passing
 
 Current Major Stage:
 Steganography + Cryptography
@@ -2310,7 +2360,7 @@ Visual Cryptography
 [x] PBKDF2-HMAC-SHA256
 [x] Secure image steganography
 [x] Automated testing
-[x] 42/42 tests passing
+[x] 57 passing tests passing
 
 [ ] Visual Cryptography
 [ ] 2-out-of-2 shares
@@ -2363,6 +2413,8 @@ The final system is intended to combine:
            FINAL PROJECT
 ```
 
-The project therefore evolves from **basic information hiding** toward a complete research-oriented system combining:
+The project now also includes secure QR messaging and contact QR/vCard workflows alongside text steganography, image steganography, and encrypted image embedding. The latest verified automated test run after merging these QR features reported **57 passed**.
 
-**Steganography + Adaptive Steganography + Cryptography + Visual Cryptography.**
+The project therefore evolves from **basic information hiding** toward a research-oriented system combining:
+
+**Steganography + Adaptive Steganography + Cryptography + Secure QR Messaging + Contact QR + Visual Cryptography.**

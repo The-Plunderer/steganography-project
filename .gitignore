@@ -26,3 +26,7 @@ tests/test_data/
 *_stego.png
 recovered_*.png
 wrong.png
+
+# Secure QR recipient keys and private credentials
+keys/
+*_private.pem

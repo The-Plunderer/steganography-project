@@ -355,7 +355,7 @@ def main():
             else:
                 message = args.message
 
-            encode_message(args.image, message, args.output)
+            encode_message(args.image, args.output, message)
 
             print("\nMessage encoded successfully.")
             print(f"Stego image: {args.output}")
